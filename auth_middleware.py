@@ -111,7 +111,7 @@ async def create_token(request: Request):
 
 
 # Protected route for pass-through with streaming
-@app.post("/protected/{path:path}")
+@app.api_route("/protected/{path:path}", methods=["GET", "POST"])
 async def protected_route(
     path: str,
     request: Request,
@@ -124,14 +124,23 @@ async def protected_route(
         # Construct the full Ollama URL including any subpath
         ollama_url = f"{OLLAMA_API_URL.rstrip('/')}/{path}"
 
-        # Get the raw request body
-        body = await request.body()
+        # Get the request method
+        method = request.method
+
+        # Common headers
         headers = {
             "Content-Type": request.headers.get("Content-Type", "application/json")
         }
 
-        # Pass the request to Ollama, maintaining streaming if specified
-        response = requests.post(ollama_url, data=body, headers=headers, stream=True)
+        if method == "GET":
+            response = requests.get(
+                ollama_url, headers=headers, params=request.query_params, stream=True
+            )
+        else:  # POST
+            body = await request.body()
+            response = requests.post(
+                ollama_url, data=body, headers=headers, stream=True
+            )
 
         # Check for errors
         if response.status_code != 200:
