@@ -6,6 +6,7 @@ import jwt
 import requests
 import os
 import logging
+import subprocess
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
@@ -184,6 +185,52 @@ def status(credentials: HTTPAuthorizationCredentials = Depends(security)):
         ollama_status = "not reachable"
 
     return {"middleware_status": middleware_status, "ollama_status": ollama_status}
+
+
+# Endpoint to kill and restart Ollama service
+@app.post("/restart-ollama")
+async def restart_ollama(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    verify_token(credentials.credentials)  # Verify token for /restart-ollama
+
+    try:
+        # Restart the Ollama service
+        restart_result = subprocess.run(
+            ["sudo", "systemctl", "restart", "ollama"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        if restart_result.returncode != 0:
+            logging.error(f"Failed to restart Ollama: {restart_result.stderr}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to restart Ollama: {restart_result.stderr}",
+            )
+
+        # Check the status of Ollama service
+        status_result = subprocess.run(
+            ["sudo", "systemctl", "status", "ollama"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        # Return status response
+        if status_result.returncode == 0:
+            logging.info("Ollama restarted successfully and is running.")
+            return {"message": "Ollama restarted successfully", "status": "running"}
+        else:
+            logging.error(f"Ollama status check failed: {status_result.stderr}")
+            return {
+                "message": "Ollama restarted but is not running",
+                "status": "not running",
+            }
+    except Exception as e:
+        logging.error(f"Error while restarting Ollama: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error restarting Ollama: {str(e)}"
+        )
 
 
 # Example root endpoint
