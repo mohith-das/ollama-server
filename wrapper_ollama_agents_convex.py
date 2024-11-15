@@ -67,7 +67,7 @@ class OllamaClient:
 model_config = {
     "model": "llama3.2:latest",
     "model_client_cls": "OllamaClient",
-    "base_url": "http://144.24.112.144",
+    "base_url": "http://144.24.112.144/amp",
     "token_password": "default_token_password",
     "device": "cpu",
     "timeout": 600,
