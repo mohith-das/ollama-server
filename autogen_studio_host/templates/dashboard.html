@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <h1>Welcome, {{ session['user'] }}</h1>
+    <a href="{{ url_for('logout') }}">Logout</a>
+    <div>
+      <iframe
+        src="{{ url_for('autogen_proxy', path='') }}"
+        style="width: 100%; height: 600px; border: none"
+      ></iframe>
+    </div>
+  </body>
+</html>
