@@ -1,6 +1,14 @@
 # Ollama Server Middleware
 
-FastAPI middleware that protects Ollama with JWT-based auth, provides token issuance, and proxies requests to the Ollama API.
+JWT-protected FastAPI proxy for Ollama with token issuance and request forwarding.
+
+## Highlights
+- Password-protected token creation with expiry.
+- Bearer auth enforced on proxy routes.
+- Streams Ollama responses through a protected endpoint.
+
+## Tech
+Python, FastAPI, JWT, Ollama
 
 ## Setup
 ```bash
@@ -22,10 +30,7 @@ uvicorn auth_middleware:app --host 0.0.0.0 --port 8000
 ```
 
 ## Endpoints
-- `POST /generate-token` - exchange password for a JWT
-- `POST /protected/{path}` - proxy to Ollama
+- `POST /generate-token`
+- `POST /protected/{path}`
 - `POST /revoke-token`
 - `GET /status`
-
-## Notes
-- Tokens are stored in memory; restart clears them.
